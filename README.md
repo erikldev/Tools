@@ -19,3 +19,9 @@ Script PowerShell para remover perfis de usuários do Windows mantendo apenas pe
 ### 1. Edite a lista de perfis a manter
 ```powershell
 $Manter = @("Administrador","Public","Teste")
+```
+
+### Rota Regedit
+
+```Erik
+Computador\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\
