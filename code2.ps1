@@ -1,8 +1,13 @@
 $Manter = @("Administrador","Public","luxxu")
 
-$perfis = Get-CimInstance Win32_UserProfile | Where-Object {
+$perfis = @(Get-CimInstance Win32_UserProfile | Where-Object {
     $_.LocalPath -like "C:\Users\*" -and
     ($Manter -notcontains (Split-Path $_.LocalPath -Leaf))
+})
+
+if ($perfis.Count -eq 0) {
+    Write-Host "Nenhum perfil encontrado para remocao." -ForegroundColor Cyan
+    return
 }
 
 Write-Host "=== PERFIS QUE SERAO REMOVIDOS ===" -ForegroundColor Red
@@ -21,7 +26,7 @@ if ($confirmar -eq 'OK') {
         Write-Progress `
             -Activity "Removendo perfis de usuario" `
             -Status "($contador de $total) $($perfil.LocalPath)" `
-            -PercentComplete (($contador / $total) * 100)
+            -PercentComplete ([math]::Round(($contador / $total) * 100))
 
         Remove-CimInstance $perfil
         Remove-Item "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$($perfil.SID)" `
