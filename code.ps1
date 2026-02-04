@@ -1,4 +1,4 @@
-$Manter = @("Administrador","Public","luxxu")
+$Manter = @("Administrador","Public","Arklok")
 
 $perfis = Get-CimInstance Win32_UserProfile | Where-Object { 
     $_.LocalPath -like "C:\Users\*" -and ($Manter -notcontains (Split-Path $_.LocalPath -Leaf)) 
