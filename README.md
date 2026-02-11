@@ -25,7 +25,7 @@ $Manter = @("Administrador","Public","Teste")
 
 ```Erik
 Computador\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\
-
+```
 
 ### Test Conexão
 
