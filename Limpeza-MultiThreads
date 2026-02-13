@@ -1,0 +1,43 @@
+$Manter = @("Administrador","Public","Arklok")
+ 
+$perfis = Get-CimInstance Win32_UserProfile | Where-Object {
+    $_.LocalPath -like "C:\Users\*" -and
+    ($Manter -notcontains (Split-Path $_.LocalPath -Leaf))
+}
+ 
+if ($perfis.Count -eq 0) {
+    Write-Host "Nenhum perfil encontrado para remocao." -ForegroundColor Cyan
+    return
+}
+ 
+Write-Host "=== PERFIS QUE SERAO REMOVIDOS ===" -ForegroundColor Red
+$perfis | ForEach-Object { Write-Host "• $($_.LocalPath)" -ForegroundColor Yellow }
+ 
+$confirmar = Read-Host "`nDigite 'OK' para remover ou Enter para cancelar"
+ 
+if ($confirmar -ne 'OK') {
+    Write-Host "Operacao cancelada." -ForegroundColor Cyan
+    return
+}
+ 
+$total = $perfis.Count
+$contador = 0
+ 
+# Ajuste aqui conforme tipo de disco
+$Throttle = 4   # SSD = 4 a 8 | HDD = 2
+ 
+$perfis | ForEach-Object -Parallel {
+ 
+    try {
+        Remove-Item $_.LocalPath -Recurse -Force -ErrorAction SilentlyContinue
+ 
+        Remove-Item "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$($_.SID)" `
+            -Recurse -Force -ErrorAction SilentlyContinue
+ 
+    } catch {
+        Write-Host "Erro ao remover $($_.LocalPath)"
+    }
+ 
+} -ThrottleLimit $Throttle
+ 
+Write-Host "Remocao concluida!" -ForegroundColor Green
