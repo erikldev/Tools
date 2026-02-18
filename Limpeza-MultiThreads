@@ -3,7 +3,8 @@ $Manter = @("Administrador","Public","Arklok")
 $perfis = Get-CimInstance Win32_UserProfile | Where-Object {
     $_.LocalPath -like "C:\Users\*" -and
     ($Manter -notcontains (Split-Path $_.LocalPath -Leaf)) -and
-    -not $_.Special
+    -not $_.Special -and
+    -not $_.Loaded
 }
 
 if ($perfis.Count -eq 0) {
@@ -21,17 +22,14 @@ if ($confirmar -ne 'OK') {
     return
 }
 
-$Throttle = 8 # Ideal para NVMe 
+$Throttle = 8
 
 $perfis | ForEach-Object -Parallel {
-
     try {
         Remove-CimInstance $_
+        Write-Host "Removido: $($_.LocalPath)" -ForegroundColor Green
     }
     catch {
-        Write-Host "Erro ao remover $($_.LocalPath)"
+        Write-Host "Erro ao remover $($_.LocalPath)" -ForegroundColor Red
     }
-
 } -ThrottleLimit $Throttle
-
-Write-Host "Remocao concluida!" -ForegroundColor Green
