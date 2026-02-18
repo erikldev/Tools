@@ -1,15 +1,12 @@
-$ManterFixos = @("Administrador","Public")
+$Manter = @("Administrador","Public","Arklok")
 
 $perfis = Get-CimInstance Win32_UserProfile | Where-Object {
     $_.LocalPath -like "C:\Users\*" -and
-    -not $_.Special -and
-    (
-        ($ManterFixos -notcontains (Split-Path $_.LocalPath -Leaf)) -and
-        ((Split-Path $_.LocalPath -Leaf) -notlike "Arklok*")
-    )
+    ($Manter -notcontains (Split-Path $_.LocalPath -Leaf)) -and
+    -not $_.Special
 }
 
-if (!$perfis) {
+if ($perfis.Count -eq 0) {
     Write-Host "Nenhum perfil encontrado para remocao." -ForegroundColor Cyan
     return
 }
@@ -24,14 +21,17 @@ if ($confirmar -ne 'OK') {
     return
 }
 
-foreach ($perfil in $perfis) {
+$Throttle = 8 # Ideal para NVMe 
+
+$perfis | ForEach-Object -Parallel {
+
     try {
-        Remove-CimInstance $perfil
-        Write-Host "Removido: $($perfil.LocalPath)" -ForegroundColor Green
+        Remove-CimInstance $_
     }
     catch {
-        Write-Host "Erro ao remover $($perfil.LocalPath)" -ForegroundColor Red
+        Write-Host "Erro ao remover $($_.LocalPath)"
     }
-}
+
+} -ThrottleLimit $Throttle
 
 Write-Host "Remocao concluida!" -ForegroundColor Green
